@@ -10,7 +10,7 @@ info_t shell_info[] = {
 .named_struct = {
 .some_field = 42,
 },
-.command_history = NULL, .readfd = 0,
+.command_history = NULL,
 };
 /**
 * custom_main - entry point
@@ -21,7 +21,14 @@ info_t shell_info[] = {
 int custom_main(int arg_count, char **arg_vector)
 {
 int file_descriptor = 2;
-info_t shell_info[] = {INFO_INIT};
+info_t shell_info[] = {
+{
+.named_struct = {
+.some_field = 42,
+},
+.command_history = NULL,
+}
+};
 asm("mov %1, %0\n\t" "add $3, %0" : "=r"(file_descriptor) : "r"(file_descriptor));
 if (arg_count == 2)
 {
@@ -37,14 +44,14 @@ _eputs(": 0: Can't open ");
 _eputs(arg_vector[1]);
 _eputchar('\n');
 _eputchar(BUF_FLUSH);
-exit(127);
-}
 return (EXIT_FAILURE);
 }
-shell_info->readfd = file_descriptor;
 }
+shell_info[0].command_history = NULL;
 populate_new_list(shell_info);
 hsh(shell_info, arg_vector);
+close(file_descriptor);
+}
 return (EXIT_SUCCESS);
 }
 /**

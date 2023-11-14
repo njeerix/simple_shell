@@ -89,6 +89,7 @@ int count_lines;
 int line_count;
 int arg_count;
 Node *command_history;
+int some_field;
 } info_t;
 typedef struct
 {
