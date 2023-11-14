@@ -1,19 +1,39 @@
-#include " shell.h"
+#include "shell.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+/**
+ * is_delimiter - checks if a character is a delimiter.
+ * @c: The character to check.
+ * @delimiters: the list of delimiter characters.
+ * Return: 1 if the character is a delimiter, 0 otherwise.
+ */
+int is_delimiter(char c, const char *delimiters)
+{
+while (*delimiters != '\0')
+{
+if (c == *delimiters)
+{
+return (1);
+}
+delimiters++;
+}
+return (0);
+}
 /**
 * custom_string_split - splits a string into words based on delimiters.
-* @param str - The input string to split.
-* @param delimiters - The delimiters - the delimeter characters to
+* @str: The input string to split.
+* @delimiters: The delimiters - the delimeter characters to
 * split the string.
 * Return: a pointer toa n arrays of strings, or NULL on failure.
 */
 char **custom_string_split(char *str, const char *delimiters)
 {
-int i, j, k, m, numwords = 0;
-char **words;
-if (str == NULL || str[0] == '\0')
-{
+char **words = NULL;
+size_t numwords = 0;
+size_t i, j, k, m;
+if (str == NULL || delimiters == NULL)
 return (NULL);
-}
 if (!delimiters)
 {
 delimiters = " ";
@@ -35,7 +55,7 @@ if (!words)
 {
 return (NULL);
 }
-for (i = 0, j = 0; j < numwords; j++)
+for (j = 0, i = 0; j < numwords; j++)
 {
 while (is_delimiter(str[i], delimiters))
 {
@@ -49,17 +69,40 @@ k++;
 words[j] = (char *)malloc((k + 1) * sizeof(char));
 if (!words[j])
 {
-for (k = 0; k < j; k++)
+for (m = 0; m < j; m++)
 {
-free(words);
+free(words[m]);
+}
 return (NULL);
 }
 for (m = 0; m < k; m++)
 {
 words[j][m] = str[i++];
 }
-words[j][m] = '\0';
+words[j][k] = '\0';
 }
-words[j] = NULL;
+words[numwords] = NULL;
 return (words);
+}
+/**
+ * main - entry point
+ * Return: 0 always
+ */
+int main(void)
+{
+char str[] = "This is a sample string,split it.";
+const char *delimiters = " ,";
+char **words = custom_string_split(str, delimiters);
+if (words != NULL)
+{
+int i = 0;
+while (words[i] != NULL)
+{
+printf("Word %d: %s\n", i, words[i]);
+free(words[i]);
+i++;
+}
+free(words);
+}
+return (0);
 }

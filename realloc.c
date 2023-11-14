@@ -1,4 +1,5 @@
 #include "shell.h"
+#include <stdlib.h>
 /**
 * my_memset - fills memory with a constant byte
 * @dest: the pointer ro the memory area
@@ -21,7 +22,7 @@ return (dest);
 */
 void free_string_array(char **str_array)
 {
-char **p +str_array;
+char **p = str_array;
 if (!str_array)
 return;
 while (*str_array)
@@ -39,31 +40,27 @@ free(p);
 */
 void *my_realloc(void *ptr, size_t old_size, size_t new_size)
 {
-char *new_ptr;
-if (!ptr)
-{
-return (malloc(new_size));
-}
-if (!new_size)
-{
-free(ptr);
-return (NULL);
-}
-if (new_size == old_size)
-{
-return (ptr);
-}
+void *new_ptr;
+size_t min_size;
+size_t i;
+min_size = old_size < new_size ? old_size : new_size;
 new_ptr = malloc(new_size);
-if (!new_ptr)
+if (new_ptr == NULL)
 {
 return (NULL);
 }
-size_t min_size = old_size < new_size ? old_size : new_size;
-my_memset(new_ptr, 0, new_size);
-for (size_t i = 0; i < min_size; i++)
+for (i = 0; i < min_size; i++)
 {
-new_ptr[i] = ((char *)ptr)[i];
+((char *)new_ptr)[i] = ((char *)ptr)[i];
 }
 free(ptr);
 return (new_ptr);
+}
+/**
+ * main - entry point
+ * Return: always 0
+ */
+int main()
+{
+return (0);
 }
