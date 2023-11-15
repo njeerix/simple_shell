@@ -37,16 +37,20 @@ info->argv[1] = NULL;
 for (i = 0; info->argv && info->argv[i]; i++);
 info->argc = i;
 replace_aliases(info);
-replaces_variables(info);
+replaces_variable(info);
 }
 }
 /**
 * release_info - frees the fields of the info_t struct
 * @info: pointer to the info_t struct
-* @free_all: true if all fields should be freed
 */
-void release_info(info_t *info, int free_all)
+void release_info(info_t *info)
 {
+if (info == NULL)
+return;
+free_linked_list(&(info->aliases));
+free_linked_list(&(info->variables));
+free_linked_list(&(info->history));
 free_string_array(info->argv);
 info->argv = NULL;
 info->path = NULL;
@@ -55,7 +59,7 @@ if (free_all)
 if (!info->command_buffer)
 free(info->arg);
 if (info->environment)
-free_linked_list(&(info->enironment));
+free_linked_list(&(info->environment));
 if (info->command_history)
 free_linked_list(&(info->command_history));
 if (info->aliases)

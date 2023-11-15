@@ -1,5 +1,6 @@
 #include "shell.h"
 #include <stdio.h>
+#include "node.h"
 /**
 * printCommandHistory - Print a command history entry.
 * @history: A pointer to a history_t structure.

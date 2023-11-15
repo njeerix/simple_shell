@@ -1,27 +1,28 @@
 #include "shell.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 /**
 * addAliasToEnd - Add an alias to the end of the list.
 * @head: A pointer to the head of the alias list.
-* @str: The alias string to add.
-* @n: An integer parameter (description needed).
+* @str: The name of the alias.
+* @value:  the value of the alias.
 * Return: 0 on success, 1 if memory allocation fails.
 */
-int addAliasToEnd(list_t **head, char *str, int n)
+int addAliasToEnd(list_t **head, char *str, char *value)
 {
-list_t *new_alias = malloc(sizeof(list_t));
-if (new_alias == NULL)
+list_t *newAlias = malloc(sizeof(list_t));
+if (newAlias == NULL)
 {
 return (1);
 }
-new_alias->str = strdup(str);
-new_alias->name = strdup(str);
-new_alias->value = NULL;
-new_alias->next = NULL;
+newAlias->str = strdup(str);
+newAlias->name = strdup(str);
+newAlias->value = strdup(value);
+newAlias->next = NULL;
 if (*head == NULL)
 {
-*head = new_alias;
+*head = newAlias;
 }
 else
 {
@@ -30,9 +31,8 @@ while (current->next != NULL)
 {
 current = current->next;
 }
-current->next = new_alias;
+current->next = newAlias;
 }
-(void)n;
 return (0);
 }
 /**
@@ -52,4 +52,25 @@ return (head);
 head = head->next;
 }
 return (NULL);
+}
+/**
+ * main - entry point
+ * Return: Always 0
+ */
+int main(void)
+{
+info_t info;
+info.alias = NULL;
+info.argc = 0;
+info.argv = NULL;
+manageAlias(&info);
+while (info.alias)
+{
+list_t *temp = info.alias;
+info.alias = info.alias->next;
+free(temp->name);
+free(temp->value);
+free(temp);
+}
+return (0);
 }

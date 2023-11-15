@@ -1,4 +1,5 @@
 #include "shell.h"
+#include "node.h"
 /**
 * prepend_node - adds a node to the beginning of the
 * list
@@ -137,7 +138,7 @@ node = *list;
 while (node)
 {
 next_node = node->next;
-free(node->str)
+free(node->str);
 free(node)
 node = next_node;
 }

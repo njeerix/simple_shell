@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "node.h"
 /**
 * custom_is_chain - checks if the current character in tthe buffer is a chain
 * character

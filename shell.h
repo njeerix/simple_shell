@@ -7,6 +7,7 @@ extern char **environ;
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "node.h"
 #define CMD_OR 1
 #define CMD_AND 2
 #define CMD_CHAIN 3
@@ -57,9 +58,11 @@ struct list_s *next;
 */
 typedef struct info
 {
-struct
+struct info_t
 {
 int some_field;
+char *name;
+void *history;
 } named_struct;
 history_t *history;
 char *name;
@@ -89,7 +92,6 @@ int count_lines;
 int line_count;
 int arg_count;
 Node *command_history;
-int some_field;
 } info_t;
 typedef struct
 {
@@ -98,11 +100,7 @@ char *command_name;
 void (*function_void)(void);
 int (*function_int)(info_t *);
 } MyBuiltinTable;
-typedef struct Node
-{
-char command[SIZE];
-struct Node *next;
-} Node;
+
 int interactive(info_t *info);
 int is_delim(char c, char *delim);
 int _isalpha(int c);
@@ -141,13 +139,13 @@ char *findEnvironmentVariable(info_t *info, const char *name);
 void displayEnvironment(info_t *info);
 void printCommandHistory(history_t *history);
 int deleteAlias(list_t **head, char *name);
-int addAliasToEnd(list_t **head, char *str, int n);
+int addAliasToEnd(list_t **head, char *str, char *value);
 list_t *findAliasWithPrefix(list_t *head, char *prefix);
 void printError(const char *message);
 int _setEnvironmentVariable(const char *name, const char *value,
 int overwrite);
 int printSingleAlias(list_t *node);
-int custom_setenv(info_t *info, const char *var, const char *value);
+int custom_setenv(info_t *info);
 int custom_unsetenv(info_t *info, const char *var);
 void release_info(info_t *info, int free_all);
 void configure_info(info_t *info, char **av);
@@ -213,7 +211,7 @@ void custom_write_history(void);
 void custom_clean_up_info(info_t *info);
 char **custom_get_environ(void);
 void custom_print_error(info_t *info, const char *message);
-char *_getEnvironmentVariable(const char *varname, char **envp);
+char *_getEnvironmentVariable(const char *varname __attribute__((unused)));
 int custom_is_delimiter(char *character, const char *delimiters);
 void custom_exit_function(void);
 void custom_help_function(void);
@@ -240,4 +238,8 @@ void AddCommandToHistory(info_t *shell_info, const char *command);
 void execute_command(info_t *shell_info, char **arg_vector);
 void read_history(info_t *shell_info);
 char *my_strdup(const char *str);
+char **copy_environment(char **env);
+int delete_node_at_index(list_t **list, unsigned int index);
+void add_node_end(list_t **head, char *str, int overwrite);
+char *create_env_string(const char *var, const char *value);
 #endif

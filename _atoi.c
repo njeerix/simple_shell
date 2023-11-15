@@ -56,3 +56,45 @@ i++;
 }
 return (output *sign);
 }
+/**
+ * main - entry point
+ * Return: Always 0
+ */
+int main(void)
+{
+int interactive_result;
+char delimiterString[] = " ,:";
+char testAlpha = 'A';
+char numString[] = "12345";
+int convertedNum;
+int is_delim_result;
+int _isalpha_result;
+info_t myInfo;
+if ((interactive_result = interactive(&myInfo)) != 0)
+{
+printf("The shell is in interactive mode.\n");
+}
+else
+{
+printf("The shell is not in interactive mode.\n");
+}
+if ((is_delim_result = is_delim(testAlpha, delimiterString)) != 0)
+{
+printf("%c is a delimiter.\n", testAlpha);
+}
+else
+{
+printf("%c is not a selimiter.\n", testAlpha);
+}
+if ((_isalpha_result = _isalpha(testAlpha)) != 0)
+{
+printf("%c is an alphabetic character.\n", testAlpha);
+}
+else
+{
+printf("%c is not an alphabetic character.\n", testAlpha);
+}
+convertedNum = _atoi(numString);
+printf("Converted number: %d\n", convertedNum);
+return (0);
+}

@@ -5,12 +5,14 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <unistd.h>
+#include "node.h"
 info_t shell_info[] = {
-{NULL},
-.named_struct = {
+{
 .some_field = 42,
+.history = NULL,
 },
 .command_history = NULL,
+},
 };
 /**
 * custom_main - entry point
@@ -21,14 +23,6 @@ info_t shell_info[] = {
 int custom_main(int arg_count, char **arg_vector)
 {
 int file_descriptor = 2;
-info_t shell_info[] = {
-{
-.named_struct = {
-.some_field = 42,
-},
-.command_history = NULL,
-}
-};
 asm("mov %1, %0\n\t" "add $3, %0" : "=r"(file_descriptor) : "r"(file_descriptor));
 if (arg_count == 2)
 {
@@ -62,7 +56,15 @@ int main(void)
 {
 FILE *historyFile;
 Node *current;
-info_t shell_info[] = {{.command_history = NULL}};
+info_t shell_info[] = {
+{
+{
+.name = NULL,
+.history = NULL
+},
+.command_history = NULL
+}
+};
 read_history(shell_info);
 populate_new_list(shell_info);
 hsh(shell_info, NULL);
@@ -154,8 +156,6 @@ Node *new_node = (Node *)malloc(sizeof(Node));
 if (new_node == NULL)
 {
 fprintf(stderr, "Memory allocation failed for command history.\n");
-exit(EXIT_FAILURE);
-return;
 }
 strncpy(new_node->command, command, SIZE - 1);
 new_node->command[SIZE - 1] = '\0';

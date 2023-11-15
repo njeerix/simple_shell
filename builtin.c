@@ -1,8 +1,9 @@
-#include <string.h>
 #include "shell.h"
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 /**
 * exitShell - Exits the shell with a specified status.
 * @info: Structure containing potential arguments.
@@ -11,11 +12,11 @@
 */
 int exitShell(info_t *info)
 {
-int exitStatus = 0;
 if (info->argc > 1)
 {
-exitStatus = atoi(info->argv[1]);
-if (exitStatus == 0 && info->argv[1][0] != '0')
+char *endptr;
+strtol(info->argv[1], &endptr, 10);
+if (*endptr != '\0')
 {
 printError("Illegal number : ");
 printf("%s\n", info->argv[1]);
@@ -27,7 +28,7 @@ return (0);
 }
 /**
 * changeDirectory - Changes the current directory of the process.
-* @info: Structure containing potential arguments.
+* @info: pointer
 * Return: Always 0.
 */
 int changeDirectory(info_t *info)
@@ -38,7 +39,7 @@ int chdirResult;
 currentDir = getcwd(buffer, 1024);
 if (!currentDir)
 {
-printf("Error: Unable to get current directory.\n");
+perror("Error: Unable to get current directory");
 return (1);
 }
 if (info->argc > 1)
@@ -47,24 +48,24 @@ newDir = info->argv[1];
 chdirResult = chdir(newDir);
 if (chdirResult == -1)
 {
-printError("Can't change to directory : ");
+perror("Can't change to directory");
 printf("%s\n", newDir);
 return (1);
 }
-_setEnvironmentVariable("OLDPWD", _getEnvironmentVariable("PWD"), 1);
+_setEnvironmentVariable("OLDPWD", currentDir, 1);
 _setEnvironmentVariable("PWD", getcwd(buffer, sizeof(buffer)), 1);
 }
 else
 {
-newDir = _getEnvironmentVariable("HOME=");
+newDir = _getEnvironmentVariable("HOME");
 chdirResult = chdir(newDir);
 if (chdirResult == -1)
 {
-printError("Can't change to directory : ");
+perror("Can't change to directory");
 printf("%s\n", newDir);
 return (1);
 }
-_setEnvironmentVariable("OLDPWD", _getEnvironmentVariable("PWD"), 1);
+_setEnvironmentVariable("OLDPWD", currentDir, 1);
 _setEnvironmentVariable("PWD", getcwd(buffer, sizeof(buffer)), 1);
 }
 return (0);

@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <string.h>
+#include "node.h"
 #define MAX_COMMAND_LENGTH 100
 /**
 * custom_shell_loop - responsible for reading and executing commands
