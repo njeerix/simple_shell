@@ -1,4 +1,9 @@
 #include "shell.h"
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <unistd.h>
 /**
 * generate_history_filename - generates the history file's
 * path
@@ -8,17 +13,21 @@
 */
 char *generate_history_filename(info_t *info)
 {
-char *home_dir = _getenv(info, "HOME=");
-if (!home_dir)
+char *home_dir;
+char *history_path;
+home_dir = _getenv(info, "HOME=");
+if (home_dir == NULL)
+{
 return (NULL);
-char *history_path = malloc(_strlen(home_dir) + _strlen(HIST_FILE) + 2);
-if (!history_path)
+}
+history_path = malloc(_strlen(home_dir) + _strlen(HISTORY_FILE) + 2);
+if (history_path == NULL)
 {
 free(home_dir);
 return (NULL);
 }
 _strcpy(history_path, "/");
-_strcat(history_path, HIST_FILE);
+_strcat(history_path, HISTORY_FILE);
 free(home_dir);
 return (history_path);
 }
@@ -31,19 +40,18 @@ int save_history(info_t *info)
 {
 char *filename = generate_history_filename(info);
 if (!filename)
-return (-1);
+return (0);
 int fd = open(filename, O_CREAT | O_TRUNC | O_RDWR, 0644);
 free(filename);
 if (fd == -1)
-return (-1);
-list *node = info->history;
-while (node)
+return (0);
+list_t *node = info->history;
+while (node != NULL)
 {
 _putsfd(node->str, fd);
 _putcharfd('\n', fd);
 node = node->next;
 }
-_putcharfd(BUF_FLUSH, fd);
 close(fd);
 return (1);
 }
@@ -67,27 +75,21 @@ if (fstat(fd, &st) != 0)
 close(fd);
 return (0);
 }
-ssize_t file = st.st_size;
-if (file_size < 2)
-{
-close(fd);
-return (0);
-}
-char *buffer = malloc(file_size * 1);
+ssize_t file_size = st.st_size;
+char *buffer = malloc(file_size + 1);
 if (!buffer)
 {
 close(fd);
 return (0);
 }
 ssize_t read_length = read(fd, buffer, file_size);
-buffer[file_size] = '\0';
+close(fd);
 if (read_length <= 0)
 {
 free(buffer);
-close(fd);
 return (0);
 }
-close(fd);
+buffer[file_size] = '\0';
 int line_count = 0;
 int last = 0;
 for (int i = 0; i < file_size; i++)
@@ -106,7 +108,7 @@ info->history = line_count;
 while (info->histcount-- >= HIST_MAX)
 delete_history_entry(&(info->history), 0);
 renumber_history_entries(info);
-return (info->histcount);
+return (line_count);
 }
 /**
 * build_history_entry - adds an entry to the command history
@@ -132,12 +134,15 @@ return (0);
 */
 int renumber_history_entries(info_t *info)
 {
-list_t *node = info->history;
-int count = 0;
-while (node)
+int count = 1;
+int i;
+history_t *node = info->history;
+for (i = 0; i < info->histcount; i++)
 {
-node->num = count++;
+node->entry_number = count++;
 node = node->next;
+info->history[i].entry_number = count++;
 }
-return (info->histcount = count);
+info->histcount = count;
+return (info->histcount);
 }

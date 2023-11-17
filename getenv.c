@@ -24,15 +24,15 @@ return (info->environ);
 */
 int custom_unsetenv(info_t *info, const char *name)
 {
-char **current = info->env;
+char ***current = &(info->env);
 int index = 0;
-while (current[index] != NULL)
+while ((*current)[index] != NULL)
 {
-if (strcmp(current[index], name) == 0)
+if (strcmp((*current)[index], name) == 0)
 {
-if (delete_node_at_index(&(info->env), index) == 0)
+if (delete_node_at_index((Node **)&(info->env), index) == 1)
 {
-return (0);
+return (1);
 }
 else
 {
@@ -60,7 +60,7 @@ return (1);
 }
 var = info->argv[1];
 value = info->argv[2];
-current = info->env;
+current = *(list_t **)info->env;
 while (current != NULL)
 {
 equals = find_equals_sign(current->str);
@@ -73,7 +73,7 @@ return (0);
 current = current->next;
 }
 env_string = create_env_string(var, value);
-add_node_end(&(info->env), env_string, 0);
+add_node_end((list_t **)&(info->env), env_string, 0);
 return (0);
 }
 /**
@@ -116,13 +116,15 @@ return (copy);
  * @index: The index of the node to delete
  * Return: 1 on success, -1 on failure
  */
-int delete_node_at_index(list_t **list, unsigned int index)
+int delete_node_at_index(Node **list, int index)
 {
-char *current = *list;
-list_t *temp;
-unsigned int i = 0;
-if (list == NULL || *list == NULL || index < 0)
+Node *current = *list;
+Node *temp = NULL;
+int i;
+if (*list == NULL || index < 0)
+{
 return (-1);
+}
 if (index == 0)
 {
 *list = current->next;
@@ -135,7 +137,9 @@ for (i = 0; i < index - 1 && current != NULL; i++)
 current = current->next;
 }
 if (current == NULL || current->next == NULL)
+{
 return (-1);
+}
 temp = current->next;
 current->next = temp->next;
 free(temp->str);
@@ -149,17 +153,28 @@ return (1);
 int main(void)
 {
 int i;
+int len;
+Node *current;
 int result;
 Node *head = malloc(sizeof(Node));
 head->str = strdup("Node 0");
 head->next = NULL;
-Node *current = head;
+current = head;
 for (i = 1; i < 5; i++)
 {
 current->next = malloc(sizeof(Node));
 current = current->next;
-asprintf(&(current->str), "Node %d", i);
-current->next = NULL'
+if (snprintf(NULL, 0, "Node %d", i) >= 0)
+{
+len = snprintf(NULL, 0, "Node %d", i) + 1;
+current->str = malloc(len);
+snprintf(current->str, len, "Node %d", i);
+}
+else
+{
+perror("Memory allocation error");
+exit(EXIT_FAILURE);
+}
 }
 printf("Original list:\n");
 current = head;
@@ -171,7 +186,7 @@ current = current->next;
 result = delete_node_at_index(&head, 2);
 if (result == 1)
 {
-printf("\nNode at index 2 deleted successfully:\n");
+printf("\nNode at index 2 delete successfully:\n");
 current = head;
 while (current != NULL)
 {
@@ -181,7 +196,7 @@ current = current->next;
 }
 else
 {
-printf("\nFailed to delete node at index 2.\n");
+printf("\nFailed to delete node at index 2,\n");
 }
 current = head;
 while (current != NULL)
@@ -192,26 +207,6 @@ free(temp->str);
 free(temp);
 }
 return (0);
-}
-/**
- * create_env_string - create an environment variable string.
- * @var: the variable name.
- * @value: the value of the variable.
- * Return: A dynamically allocated string in the form "VAR=VALUE".
- */
-char *create_env_string(const char *var, const char *value)
-{
-char *env_string;
-size_t len_var = strlen(var);
-size_t len_value = strlen(value);
-env_string = malloc(len_var + len_value + 2);
-if (env_string == NULL)
-{
-perror("Memory allocation error");
-exit(EXIT_FAILURE);
-}
-snprintf(env_string, len_var + len_value + 2, "%s=%s", var, value);
-return (env_string);
 }
 /**
  * add_node_end - add a node to the end of a linked list.
@@ -254,4 +249,55 @@ exit(EXIT_FAILURE);
 new_node->str = strdup(str);
 new_node->next = NULL;
 current->next = new_node;
+}
+/**
+ * find_equals_sign - find the position of the equals sign in a string.
+ * @str: the string to search.
+ * Return: a pointer to the first occurrence of the equals sign, or NULL if not found.
+ */
+char *find_equals_sign(const char *str)
+{
+int index = 0;
+while (str[index] != '\0')
+{
+if (str[index] == '=')
+return ((char *)&str[index]);
+index++;
+}
+return (NULL);
+}
+/**
+ * create_new_string - creates an environment variable string
+ * @var: the variable name.
+ * @value: the value of the variable.
+ * Return: a dynamically allocated string in the form "VAR=VALUE".
+ */
+char *create_env_string(const char *var, const char *value)
+{
+char *env_string;
+size_t len_var = strlen(var);
+size_t len_value = strlen(value);
+env_string = malloc(len_var + len_value + 2);
+if (env_string == NULL)
+{
+perror("Memory allocation error");
+exit(EXIT_FAILURE);
+}
+snprintf(env_string, len_var + len_value + 2, "%s=%s", var, value);
+return (env_string);
+}
+/**
+ * printfError - print error message to standard error
+ * @msg: the error message to print
+ */
+void printError(const char *msg)
+{
+if (msg != NULL)
+{
+fprintf(stderr, "Error: %s\n", msg);
+}
+else
+{
+fprintf(stderr, "An error occurred\n");
+}
 }

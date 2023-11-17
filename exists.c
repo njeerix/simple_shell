@@ -60,3 +60,26 @@ s++;
 }
 return (NULL);
 }
+/**
+ * main - entry point of the progarm
+ * Return: 0 on success, non_zero on failure
+ */
+int main(void)
+{
+char c;
+char dest[100] = "Hello";
+const char src[] = "World!";
+int n = 5;
+char *result;
+_strncpy_custom(dest, src, n);
+printf("Copied string: %s\n", dest);
+_strncat_custom(dest, src, n);
+printf("Concatenated string: %s\n", dest);
+c = 'W';
+result = _strchr_custom(dest, c);
+if (result != NULL)
+printf("Character '%c' found at position: %ld\n", c, result - dest);
+else
+printf("Character '%c' not found in the string\n", c);
+return (0);
+}

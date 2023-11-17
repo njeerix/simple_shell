@@ -12,7 +12,10 @@ extern char **environ;
 #define CMD_AND 2
 #define CMD_CHAIN 3
 #define WRITE_BUF_SIZE 1024
-#define BUF_FLUSH '\n'
+#ifndef BUF_FLUSH
+#undef BUF_FLUSH
+#endif
+#define BUF_FLUSH '\0'
 #define BUFFER_FLUSH 0
 #define INFO_INIT { 0, '\0', 0, 0.0, NULL, NULL, NULL, 0, -1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, {NULL}, 0, 0, NULL, NULL, 0, 0, 0}
 #define HISTORY_FILE "history.txt"
@@ -92,6 +95,8 @@ int count_lines;
 int line_count;
 int arg_count;
 Node *command_history;
+struct Node **variables;
+struct Node **environment;
 } info_t;
 typedef struct
 {
@@ -101,7 +106,7 @@ void (*function_void)(void);
 int (*function_int)(info_t *);
 } MyBuiltinTable;
 
-int interactive(info_t *info);
+void interactive(__attribute__((unused)) info_t *info);
 int is_delim(char c, char *delim);
 int _isalpha(int c);
 int _atoi(char *s);
@@ -209,7 +214,7 @@ void custom_hello(void);
 void custom_clean_info(info_t *info);
 void custom_write_history(void);
 void custom_clean_up_info(info_t *info);
-char **custom_get_environ(void);
+char **custom_get_environ(info_t *info);
 void custom_print_error(info_t *info, const char *message);
 char *_getEnvironmentVariable(const char *varname __attribute__((unused)));
 int custom_is_delimiter(char *character, const char *delimiters);
@@ -230,16 +235,30 @@ ssize_t _eputchar(char c);
 void populate_new_history(info_t *shell_info);
 void hsh(info_t *shell_info, char **arg_vector);
 void populate_new_list(info_t *shell_info);
-size_t _strlen(const char *s);
 void AddCommandToHistory(info_t *shell_info, const char *command);
 void populate_new_list(info_t *shell_info);
 void hsh(info_t *shell_info, char **arg_vector);
 void AddCommandToHistory(info_t *shell_info, const char *command);
-void execute_command(info_t *shell_info, char **arg_vector);
+int execute_command(char **arg_vector);
 void read_history(info_t *shell_info);
 char *my_strdup(const char *str);
 char **copy_environment(char **env);
-int delete_node_at_index(list_t **list, unsigned int index);
+int delete_node_at_index(Node **list, int index);
 void add_node_end(list_t **head, char *str, int overwrite);
 char *create_env_string(const char *var, const char *value);
+char *find_equals_sign(const char *str);
+void init_info(info_t *info, char **env, char **argv);
+void free_info(info_t *info);
+void free_string_array(char **array);
+void free_command_buffer(info_t *info);
+char **duplicate_string_array(char **arr);
+char *duplicate_string(const char *str);
+void free_command_buffer(info_t *info);
+char *duplicate_string(const char *str);
+void replace_aliases(info_t *info);
+void replaces_variable(info_t *info);
+char *_getenv(info_t *info, const char *name);
+size_t _strlen(const char *str);
+void _strcpy(char *dest, const char *src);
+void _strcat(char *dest, const char *src);
 #endif

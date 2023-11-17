@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
 /**
 * customAtoi - converts a string to an integer
 * @s: the string to be converted
@@ -94,4 +95,119 @@ break;
  */
 int main(void)
 {
+info_t info;
+init_info(&info, NULL, NULL);
+while (1)
+{
+char *input = NULL;
+size_t len = 0;
+ssize_t read;
+if (isatty(STDIN_FILENO))
+write(STDOUT_FILENO, "$ ", 2);
+read = getline(&input, &len, stdin);
+if (read == -1)
+{
+if (isatty(STDIN_FILENO))
+write(STDOUT_FILENO, "\n", 1);
+free(input);
+break;
+}
+if (read > 1)
+{
+if (input[read - 1] == '\n')
+input[read - 1] = '\0';
+removeComments(input);
+if (input[0] != '\0')
+{
+execute_command(&info, &input);
+printErrorMessage(&info, "Command not found");
+}
+}
+free(input);
+}
+free_info(&info);
+return (0);
+}
+/**
+ * init_info - initializes the info structure.
+ * @info: pointer to the info structure to be initialized.
+ * @env: array of environment variables.
+ * @argv: array of command-line arguments.
+ */
+void init_info(info_t *info, char **env, char **argv)
+{
+if (info == NULL)
+{
+return;
+}
+info->env = env;
+info->argv = argv;
+if (argv != NULL && argv[0] != NULL)
+{
+info->name = strdup(argv[0]);
+}
+else
+{
+info->name = NULL;
+}
+}
+/**
+ * freed_info - frees resources associated with the info structure.
+ * @info: pointer to the info structure to be freed.
+ */
+void free_info(info_t *info)
+{
+if (info == NULL)
+{
+return;
+}
+if (info->name != NULL)
+{
+free(info->name);
+}
+info->env = NULL;
+info->argv = NULL;
+info->name = NULL;
+}
+/**
+ * execute_command -  executes a shell command.
+ * @info: pointer to the info structure.
+ * @arg_vector: array of command-line arguments.
+ * Return: 0 on success, -1 on failure.
+ */
+int execute_command(info_t *info, char **arg_vector)
+{
+pid_t pid;
+if (info == NULL || arg_vector == NULL || arg_vector[0] == NULL)
+{
+return (-1);
+}
+pid = fork();
+if (pid == -1)
+{
+perror("fork");
+return (-1);
+}
+if (pid == 0)
+{
+if (execve(arg_vector[0], arg_vector, info->environ) == -1)
+{
+perror("execve");
+_exit(EXIT_FAILURE);
+}
+}
+else
+{
+int status;
+if (waitpid(pid, &status, 0) == -1)
+{
+perror("waitpid");
+return (-1);
+}
+else
+{
+return (WEXITSTATUS(status));
+}
+}
+return (-1);
 }

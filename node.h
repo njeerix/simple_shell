@@ -8,6 +8,7 @@
  */
 typedef struct Node
 {
+char *data;
 char command[SIZE];
 char *str;
 struct Node *next;

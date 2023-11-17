@@ -1,6 +1,10 @@
 #include <stddef.h>
 #include "shell.h"
 #include <stdio.h>
+#include <stdlib.h>
+#ifndef BUF_FLUSH
+#undef BUF_FLUSH
+#endif
 #define BUF_FLUSH '\0'
 /**
 * custom_strncpy - Custom string copy function
@@ -80,14 +84,40 @@ putchar(BUF_FLUSH);
 */
 int main(void)
 {
-info_t info;
-info.env = NULL;
-info.alias = NULL;
-info.argv = NULL;
-info.argc = 0;
-info.readfd = 0;
-info.history = NULL;
-info.str = NULL;
-interactive(&info);
+info_t *info = malloc(sizeof(info_t));
+if (info == NULL)
+{
+return (1);
+}
+info->env = NULL;
+info->alias = NULL;
+info->argv = NULL;
+info->argc = 0;
+info->readfd = 0;
+info->history = NULL;
+info->str = NULL;
+printf("Initialized the info structure\n");
+interactive(info);
+free(info);
 return (0);
+}
+/**
+ * interactive - runs the interactive mode of the shell.
+ * @info: pointer to the info_t structure
+ */
+void interactive(__attribute__((unused)) info_t *info)
+{
+char *input = NULL;
+while (1)
+{
+size_t bufsize = 0;
+ssize_t characters = getline(&input, &bufsize, stdin);
+if (characters == -1)
+{
+break;
+}
+free(input);
+input = NULL;
+}
+free(input);
 }
